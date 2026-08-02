@@ -10,7 +10,7 @@ Gemini CLI и многие другие.
 
 | Навык | Описание |
 |-------|----------|
-| [`sape-links-seo`](./sape-links-seo) | Покупка SEO-статей и ссылочных размещений на проверенных площадках-донорах через платформу Sape Links. |
+| [`sape-links-seo`](skills/sape-links-seo) | Покупка SEO-статей и ссылочных размещений на проверенных площадках-донорах через платформу Sape Links. |
 
 ---
 
@@ -58,11 +58,11 @@ https://mcp-links.sape.ru/mcp
 
 ### 2. Установите навык
 
-Навык — это папка `sape-links-seo/`. Чтобы загрузить в агента, упакуйте её так, чтобы
+Навык — это папка `skills/sape-links-seo/`. Чтобы загрузить в агента, упакуйте её так, чтобы
 **папка была корнем** архива (по спецификации Agent Skills):
 
 ```bash
-zip -r sape-links-seo.zip sape-links-seo
+zip -r sape-links-seo.zip skills/sape-links-seo
 ```
 
 Затем, например в Claude, перейдите в *Customize → Skills* и загрузите архив. Другие агенты,
@@ -84,7 +84,7 @@ example.com и купь гостевой пост до 5000 ₽.»* Навык �
 agents-skill-sape-seo/
 ├── README.md                              # этот файл (уровень репо, не входит в пакет навыка)
 ├── .gitignore
-└── sape-links-seo/                        # пакет навыка
+└── skills/sape-links-seo/                 # пакет навыка
     ├── SKILL.md                           # метаданные + инструкции workflow
     └── references/
         └── placement_actions.md           # справочник действий и статусов размещений
