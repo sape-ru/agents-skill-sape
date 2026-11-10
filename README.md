@@ -77,15 +77,27 @@ https://mcp-links.sape.ru/mcp
 
 ### 2. Установите навык
 
-Навык — это папка `skills/sape-links-seo/`. Чтобы загрузить в агента, упакуйте её так, чтобы
-**папка была корнем** архива (по спецификации Agent Skills):
+Готовые архивы навыка лежат в [Releases](https://github.com/sape-ru/agents-skill-sape/releases/latest).
+Паковать самому не нужно — скачайте подходящий:
+
+| Куда ставите | Архив |
+|---|---|
+| **claude.ai / Claude Desktop** (*Customize → Skills → Upload a skill*) | [`sape-links-seo-claude-web.zip`](https://github.com/sape-ru/agents-skill-sape/releases/latest/download/sape-links-seo-claude-web.zip) — с коротким описанием, укладывается в лимит claude.ai (200 символов) |
+| **Другие агенты** со стандартом [Agent Skills](https://agentskills.io) (Cursor, Codex, Gemini CLI и др.) | [`sape-links-seo.zip`](https://github.com/sape-ru/agents-skill-sape/releases/latest/download/sape-links-seo.zip) — исходный навык без изменений |
+
+В каждом релизе есть и архивы с версией в имени (например, `sape-links-seo-1.2.0.zip`), если нужна
+конкретная версия. Для Claude Code удобнее ставить плагином — см. «Быстрая установка» выше.
+
+<details>
+<summary>Собрать архив самостоятельно</summary>
 
 ```bash
-zip -r sape-links-seo.zip skills/sape-links-seo
+python3 scripts/package_skill.py   # архивы появятся в dist/
 ```
 
-Затем, например в Claude, перейдите в *Customize → Skills* и загрузите архив. Другие агенты,
-поддерживающие стандарт, принимают тот же пакет — см. список [Agent Skills clients](https://agentskills.io).
+Скрипт проверяет, что версия совпадает во всех файлах, и кладёт папку навыка **корнем** архива,
+как требует спецификация Agent Skills.
+</details>
 
 ### 3. Используйте
 
@@ -107,11 +119,28 @@ agents-skill-sape-seo/
 │   ├── marketplace.json                   # каталог плагинов Claude (маркетплейс «sape»)
 │   └── plugin.json                        # манифест плагина sape-links-seo
 ├── .mcp.json                              # подключение Sape Links MCP в составе плагина
+├── .github/workflows/release.yml          # сборка архивов и публикация релизов
+├── packaging/
+│   └── claude-web-description.txt         # короткое описание навыка для claude.ai (≤ 200 символов)
+├── scripts/
+│   └── package_skill.py                   # проверка версий и сборка ZIP-архивов
 └── skills/sape-links-seo/                 # пакет навыка
     ├── SKILL.md                           # метаданные + инструкции workflow
     └── references/
         └── placement_actions.md           # справочник действий и статусов размещений
 ```
+
+## Выпуск новой версии
+
+1. Поднимите версию **одинаково в трёх местах**: `version` в `skills/sape-links-seo/SKILL.md`,
+   в `.claude-plugin/plugin.json` и у плагина в `.claude-plugin/marketplace.json`.
+2. Если менялось описание навыка (`description` в `SKILL.md`), обновите и короткое описание
+   в `packaging/claude-web-description.txt` — его видит claude.ai.
+3. Влейте изменения в `main`. GitHub Actions сам поставит тег `vX.Y.Z`, соберёт архивы и создаст релиз.
+
+На каждом PR та же проверка запускается без публикации: если версии разошлись или короткое описание
+длиннее 200 символов, проверка упадёт. Изменения без новой версии релиз не создают — пользователи
+плагина и архивов их не получат.
 
 ## Смотрите также
 
