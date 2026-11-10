@@ -1,0 +1,20 @@
+{
+  "name": "sape",
+  "owner": {
+    "name": "Sape"
+  },
+  "metadata": {
+    "description": "Плагины Sape для Claude: закупка SEO-статей и ссылочных размещений через платформу Sape Links."
+  },
+  "plugins": [
+    {
+      "name": "sape-links-seo",
+      "source": "./",
+      "description": "Покупка SEO-статей и ссылочных размещений на проверенных площадках-донорах через Sape Links: проекты, поиск доноров по DR/трафику/цене/языку, Избранное, загрузка статей и URL с анкорами, статейные и арендные размещения.",
+      "version": "1.2.0",
+      "category": "marketing",
+      "keywords": ["seo", "backlinks", "link-building", "guest-posts", "sape"],
+      "homepage": "https://github.com/sape-ru/agents-skill-sape"
+    }
+  ]
+}

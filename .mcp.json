@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sape": {
+      "type": "http",
+      "url": "https://mcp-links.sape.ru/mcp"
+    }
+  }
+}
