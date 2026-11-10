@@ -3,7 +3,8 @@ name: Release
 # На каждом PR: проверяет версии и собирает архивы (без публикации).
 # На main: если версии из .claude-plugin/plugin.json ещё нет среди релизов —
 # ставит тег vX.Y.Z и создаёт GitHub Release с ZIP-архивами навыка.
-# Чтобы выпустить новую версию, поднимите её в SKILL.md, plugin.json и marketplace.json.
+# Чтобы выпустить новую версию, поднимите её в SKILL.md, plugin.json и marketplace.json
+# и добавьте раздел "## X.Y.Z" в CHANGELOG.md — он станет описанием релиза.
 
 on:
   push:
@@ -27,6 +28,21 @@ jobs:
       - name: Проверить версии и собрать архивы
         run: python3 scripts/package_skill.py --output dist
 
+      - name: Взять описание релиза из CHANGELOG.md
+        run: |
+          VERSION=$(python3 scripts/package_skill.py --version)
+          # Текст между "## X.Y.Z" и следующим заголовком "## ".
+          awk -v v="$VERSION" '
+            /^## / { if (found) exit; if ($2 == v) { found = 1; next } }
+            found
+          ' CHANGELOG.md | sed -e '/./,$!d' > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "::error file=CHANGELOG.md::Нет раздела '## $VERSION' — опишите изменения этой версии в CHANGELOG.md"
+            exit 1
+          fi
+          echo "Описание релиза v$VERSION:"
+          cat release-notes.md
+
       - name: Создать релиз, если этой версии ещё нет
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
@@ -41,5 +57,5 @@ jobs:
           gh release create "v$VERSION" dist/*.zip \
             --target "$GITHUB_SHA" \
             --title "v$VERSION" \
-            --generate-notes
+            --notes-file release-notes.md
           echo "Создан релиз v$VERSION." >> "$GITHUB_STEP_SUMMARY"
