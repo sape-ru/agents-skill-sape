@@ -29,6 +29,25 @@ DR / трафику / цене / языку, загружать статьи, п
 - Покупка четырёх типов размещений: `news`, `review`, `link`, `archive`
 - Управление купленными размещениями (одобрение, отмена, расторжение, …) со встроенными финансовыми ограничениями
 
+### Быстрая установка в Claude (плагин)
+
+Репозиторий одновременно является маркетплейсом плагинов Claude. Плагин `sape-links-seo`
+содержит и навык, и подключение Sape Links MCP — ставится одним шагом:
+
+- **Claude Desktop / Claude Code (интерфейс):** добавьте маркетплейс по ссылке
+  `https://github.com/sape-ru/agents-skill-sape` и установите плагин `sape-links-seo`.
+- **Claude Code (CLI):**
+
+  ```bash
+  /plugin marketplace add sape-ru/agents-skill-sape
+  /plugin install sape-links-seo@sape
+  ```
+
+При первом обращении к инструментам Sape откроется вход через OAuth. Если Sape Links MCP у вас
+уже подключён вручную, отключите один из двух, чтобы инструменты не дублировались.
+
+Для других агентов и для claude.ai (загрузка навыка архивом) используйте ручную установку ниже.
+
 ### 1. Подключите Sape Links MCP
 
 Sape Links MCP — размещённый **streamable HTTP** сервер. Подключается только по URL —
@@ -84,6 +103,10 @@ example.com и купь гостевой пост до 5000 ₽.»* Навык �
 agents-skill-sape-seo/
 ├── README.md                              # этот файл (уровень репо, не входит в пакет навыка)
 ├── .gitignore
+├── .claude-plugin/
+│   ├── marketplace.json                   # каталог плагинов Claude (маркетплейс «sape»)
+│   └── plugin.json                        # манифест плагина sape-links-seo
+├── .mcp.json                              # подключение Sape Links MCP в составе плагина
 └── skills/sape-links-seo/                 # пакет навыка
     ├── SKILL.md                           # метаданные + инструкции workflow
     └── references/
