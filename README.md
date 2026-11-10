@@ -96,3 +96,4 @@ agents-skill-sape-seo/
 - [Как создавать собственные навыки (Claude Help Center)](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills)
 - Документация API Sape Links: [https://api-links.sape.ru/api/](https://api-links.sape.ru/api/)
 - Приложение Sape Links: [https://api-links.sape.ru](https://api-links.sape.ru)
+
