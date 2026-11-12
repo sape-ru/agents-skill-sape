@@ -4,6 +4,8 @@ name: Release on version bump
 # .claude-plugin/plugin.json меняется на main. Заметки релиза берутся из
 # соответствующего раздела `### x.y.z (дата)` в VERSIONS.md. Повторные запуски
 # не двигают существующий тег — пересобирают и заменяют только ZIP-архивы.
+# Можно запустить и вручную (workflow_dispatch) — например, чтобы пересобрать
+# архивы или пересоздать релиз после сбоя.
 
 on:
   push:
@@ -13,6 +15,7 @@ on:
       - ".claude-plugin/marketplace.json"
       - "skills/sape-links-seo/SKILL.md"
       - "VERSIONS.md"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,11 +24,11 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
