@@ -79,6 +79,16 @@ def web_skill_text(skill_text):
     return f"---\n{fm}\n---\n" + skill_text[m.end():]
 
 
+def validate_skill(skill_text):
+    """Все предсборочные проверки. Возвращает (версия, текст навыка для claude.ai)."""
+    version = check_versions(skill_text)
+    desc = fm_field(read_frontmatter(skill_text).group(1), "description") or ""
+    if not 1 <= len(desc) <= MAX_DESC:
+        fail(f"описание в SKILL.md — {len(desc)} символов, допустимо 1–{MAX_DESC}")
+    web_text = web_skill_text(skill_text)
+    return version, web_text
+
+
 def skill_files():
     for path in sorted(SKILL_DIR.rglob("*")):
         rel = path.relative_to(SKILL_DIR)
@@ -104,11 +114,7 @@ def main():
 
     # Приводим переводы строк к LF: при сборке на Windows git может отдать файл с CRLF.
     skill_text = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").replace("\r\n", "\n")
-    version = check_versions(skill_text)
-    desc = fm_field(read_frontmatter(skill_text).group(1), "description") or ""
-    if not 1 <= len(desc) <= MAX_DESC:
-        fail(f"описание в SKILL.md — {len(desc)} символов, допустимо 1–{MAX_DESC}")
-    web_text = web_skill_text(skill_text)
+    version, web_text = validate_skill(skill_text)
 
     if args.version:
         print(version)
