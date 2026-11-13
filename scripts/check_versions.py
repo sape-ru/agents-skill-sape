@@ -10,7 +10,8 @@
 - таблица в VERSIONS.md содержит текущую версию навыка;
 - в VERSIONS.md есть раздел `### X.Y.Z (дата)` — из него release-воркфлоу берёт
   заголовок и заметки релиза vX.Y.Z;
-- PR, меняющий файлы навыка (skills/**), поднимает версию относительно base.
+- PR, меняющий файлы навыка или упаковки (skills/**, packaging/**), поднимает версию
+  относительно base.
 
 Любое расхождение завершает скрипт с ошибкой — так PR-проверка падает
 с понятным сообщением.
@@ -73,13 +74,13 @@ def check_versions_md(version):
 
 
 def check_bump(version, base, changed):
-    if not any(p.startswith("skills/") for p in changed):
+    if not any(p.startswith(("skills/", "packaging/")) for p in changed):
         return
     base_version = version_at(base)
     if base_version and parse_version(version) <= parse_version(base_version):
         fail(
-            f"PR меняет файлы навыка (skills/**), но версия не поднята: "
-            f"{base_version} → {version}. Поднимите версию одинаково в "
+            f"PR меняет файлы навыка или упаковки (skills/**, packaging/**), но версия "
+            f"не поднята: {base_version} → {version}. Поднимите версию одинаково в "
             "skills/sape-links-seo/SKILL.md, .claude-plugin/plugin.json и "
             ".claude-plugin/marketplace.json и опишите изменения в VERSIONS.md."
         )
