@@ -122,6 +122,8 @@ example.com и купь гостевой пост до 5000 ₽.»* Навык �
 ```
 agents-skill-sape-seo/
 ├── README.md                              # этот файл (уровень репо, не входит в пакет навыка)
+├── AGENTS.md                              # правила для AI-агентов, работающих в репозитории
+├── CLAUDE.md                              # отсылка к AGENTS.md для Claude Code (импорт @AGENTS.md)
 ├── VERSIONS.md                            # версии навыка и заметки релизов
 ├── .gitignore
 ├── .claude-plugin/
