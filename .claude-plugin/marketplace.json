@@ -11,7 +11,7 @@
       "name": "sape-links-seo",
       "source": "./",
       "description": "Покупка SEO-статей и ссылочных размещений на проверенных площадках-донорах через Sape Links: проекты, поиск доноров по DR/трафику/цене/языку, Избранное, загрузка статей и URL с анкорами, статейные и арендные размещения.",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "category": "marketing",
       "keywords": ["seo", "backlinks", "link-building", "guest-posts", "sape"],
       "homepage": "https://github.com/sape-ru/agents-skill-sape"
