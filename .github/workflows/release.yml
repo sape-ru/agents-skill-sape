@@ -6,6 +6,8 @@ name: Release on version bump
 # не двигают существующий тег — пересобирают и заменяют только ZIP-архивы.
 # Можно запустить и вручную (workflow_dispatch) — например, чтобы пересобрать
 # архивы или пересоздать релиз после сбоя.
+# Если после тега текущей версии менялись skills/ или packaging/ без бампа
+# версии — запуск падает: изменения должны дойти до пользователей через релиз.
 
 on:
   push:
@@ -13,7 +15,8 @@ on:
     paths:
       - ".claude-plugin/plugin.json"
       - ".claude-plugin/marketplace.json"
-      - "skills/sape-links-seo/SKILL.md"
+      - "skills/**"
+      - "packaging/**"
       - "VERSIONS.md"
   workflow_dispatch:
 
@@ -31,6 +34,19 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+
+      - name: Проверить, что изменения навыка выпущены
+        run: |
+          VERSION=$(python3 scripts/package_skill.py --version)
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            CHANGED=$(git diff --name-only "refs/tags/v$VERSION..HEAD" -- skills/ packaging/)
+            if [ -n "$CHANGED" ]; then
+              echo "Изменения после тега v$VERSION, не попавшие в релиз:"
+              echo "$CHANGED" | sed 's/^/  - /'
+              echo "::error::После тега v$VERSION менялись skills/ или packaging/, но версия не поднята — изменения не попадут к пользователям релизов. Поднимите версию в SKILL.md, plugin.json и marketplace.json и опишите её в VERSIONS.md."
+              exit 1
+            fi
+          fi
 
       - name: Определить версию и проверить, есть ли уже тег
         id: ver
