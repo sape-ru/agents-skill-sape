@@ -32,19 +32,27 @@ DR / трафику / цене / языку, загружать статьи, п
 ### Быстрая установка в Claude (плагин)
 
 Репозиторий одновременно является маркетплейсом плагинов Claude. Плагин `sape-links-seo`
-содержит и навык, и подключение Sape Links MCP — ставится одним шагом:
+содержит и навык, и подключение Sape Links MCP.
 
-- **Claude Desktop / Claude Code (интерфейс):** добавьте маркетплейс по ссылке
-  `https://github.com/sape-ru/agents-skill-sape` и установите плагин `sape-links-seo`.
-- **Claude Code (CLI):**
+- **claude.ai / Claude Desktop:** *Customize → Plugins → Add → Add marketplace*, вставьте
+  `https://github.com/sape-ru/agents-skill-sape` и добавьте плагин `sape-links-seo`.
+  Затем откройте плагин → вкладка **Connectors** → добавьте и подключите `sape` (вход через
+  OAuth) — без этого навык установлен, но инструменты Sape недоступны.
+- **Claude Code (CLI, десктоп-приложение, VS Code):**
 
   ```bash
   /plugin marketplace add sape-ru/agents-skill-sape
   /plugin install sape-links-seo@sape
   ```
 
-При первом обращении к инструментам Sape откроется вход через OAuth. Если Sape Links MCP у вас
-уже подключён вручную, отключите один из двух, чтобы инструменты не дублировались.
+  Вторая команда откроет карточку плагина — выберите область установки (user / project / local).
+  При первом обращении к инструментам Sape откроется вход через OAuth.
+
+Плагины из сторонних маркетплейсов не обновляются автоматически — обновляйте через
+`/plugin` → **Update now** или `claude plugin update sape-links-seo@sape`.
+
+Если Sape Links MCP у вас уже подключён вручную, отключите один из двух, чтобы инструменты
+не дублировались.
 
 Для других агентов и для claude.ai (загрузка навыка архивом) используйте ручную установку ниже.
 
