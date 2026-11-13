@@ -1,6 +1,6 @@
 {
   "name": "sape-links-seo",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Покупка SEO-статей и ссылочных размещений на проверенных площадках-донорах через платформу Sape Links. Требуется подключённый Sape Links MCP-сервер (https://mcp-links.sape.ru/mcp).",
   "author": {
     "name": "Sape",
