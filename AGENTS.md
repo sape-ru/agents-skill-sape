@@ -5,9 +5,15 @@
 ## Обзор репозитория
 
 Репозиторий содержит **Agent Skills** — портативные пакеты навыков по открытому стандарту
-[Agent Skills](https://agentskills.io). Сейчас в нём один навык — `sape-links-seo`: покупка
-SEO-статей и ссылочных размещений на площадках-донорах через платформу
-[Sape](https://sape.ru).
+[Agent Skills](https://agentskills.io) для биржи ссылок [Sape](https://sape.ru). Навыков два:
+
+- `sape-links-seo` — платформенный: подключение, форматы, поиск, покупка и управление
+  размещениями;
+- `sape-link-placements` — навык по задаче: подбор доноров и покупка, опирается на
+  механику из `sape-links-seo`.
+
+Общие правила для агентов (подключение, траты, баланс, ошибки, честность) живут в `llms.txt`
+и копируются в каждый навык скриптом — см. «Общие правила навыков».
 
 Одновременно репозиторий служит **маркетплейсом плагинов Claude** (`.claude-plugin/`),
 поэтому у него две аудитории: агенты, устанавливающие навык ZIP-архивом, и Claude Code,
@@ -34,16 +40,26 @@ agents-skill-sape/
 │   └── plugin.json                        # манифест плагина sape-links-seo
 ├── .github/workflows/
 │   ├── release.yml                        # тег vX.Y.Z, сборка архивов, GitHub Release
-│   └── check-versions.yml                 # PR-проверки версий, описаний и бампа
+│   ├── check-versions.yml                 # PR-проверки версий, описаний и бампа
+│   └── check-skills.yml                   # PR и push: правила синхронны, навыки по стандарту
 ├── packaging/
 │   └── claude-web-description.txt         # короткое описание для claude.ai (≤ 200 символов)
+├── llms.txt                               # общие правила для агентов — источник для навыков
 ├── scripts/
 │   ├── package_skill.py                   # проверки и сборка ZIP-архивов
-│   └── check_versions.py                  # проверки для PR
-└── skills/sape-links-seo/
-    ├── SKILL.md                           # метаданные и инструкции workflow
-    └── references/
-        └── placement_actions.md           # действия и статусы размещений
+│   ├── check_versions.py                  # проверки для PR
+│   ├── sync_rules.py                      # копирует правила из llms.txt в навыки
+│   └── validate_skills.py                 # проверка навыков по стандарту
+└── skills/
+    ├── sape-links-seo/
+    │   ├── SKILL.md                       # платформенный навык
+    │   └── references/
+    │       ├── tools.md                   # все инструменты MCP с параметрами
+    │       └── placement_actions.md       # действия и статусы размещений
+    └── sape-link-placements/
+        ├── SKILL.md                       # навык по задаче
+        └── references/
+            └── similar-sites.md           # поиск похожих площадок
 ```
 
 ## Проверки и сборка
@@ -56,7 +72,14 @@ python3 scripts/package_skill.py --version            # сверить верс�
 python3 scripts/package_skill.py                      # собрать 4 ZIP-архива в dist/
 python3 scripts/package_skill.py --output /tmp/out    # собрать в другую папку
 python3 scripts/check_versions.py --base origin/main  # то же, что проверка на PR
+python3 scripts/sync_rules.py --check                 # блоки правил совпадают с llms.txt
+python3 scripts/validate_skills.py                    # стандарт навыков и правила репозитория
 ```
+
+`validate_skills.py` проверяет каждый навык: `name` совпадает с папкой, `description` до 1024
+символов, `version` совпадает с `plugin.json`, `SKILL.md` не длиннее 500 строк, каждый файл из
+`references/` упомянут в своём `SKILL.md`, `evals/evals.json` (если есть) — валидный JSON.
+Обе проверки запускает workflow `check-skills.yml` на PR и push.
 
 `package_skill.py` проверяет, что версия совпадает в `SKILL.md`, `.claude-plugin/plugin.json`
 и `.claude-plugin/marketplace.json`, что `description` в `SKILL.md` не длиннее 1024 символов,
@@ -83,6 +106,7 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 | Место | Поле |
 |---|---|
 | `skills/sape-links-seo/SKILL.md` | `version` во frontmatter |
+| `skills/sape-link-placements/SKILL.md` | `version` во frontmatter (сверяет `validate_skills.py`) |
 | `.claude-plugin/plugin.json` | `version` |
 | `.claude-plugin/marketplace.json` | `version` у плагина `sape-links-seo` |
 | `VERSIONS.md` | строка навыка в таблице |
@@ -135,6 +159,20 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 workflow запускается по путям, и PR без правок в навыке не отчитался бы статусом. Поэтому
 PR-проверка — обязательный шаг процесса, а не блокировка merge. Если прямой push всё же
 случился, единственная страховка — шаг 1 релизного workflow.
+
+## Общие правила навыков
+
+`llms.txt` — единственный источник правил для агентов. Раздел `## Правила для агентов`
+копируется в каждый `SKILL.md` между маркерами `<!-- sape-rules:start -->` и
+`<!-- sape-rules:end -->`.
+
+- Блок между маркерами **не редактируйте** в навыке: правьте `llms.txt` и запускайте
+  `python3 scripts/sync_rules.py`.
+- В каждом навыке ровно один блок маркеров; новый навык начинается с пустой пары маркеров.
+- Если блок правил и остальной текст навыка расходятся, агент следует блоку правил.
+
+Сборка ZIP (`package_skill.py`) пока собирает только `sape-links-seo`; `sape-link-placements`
+приходит к пользователям в составе плагина.
 
 ## Стандарт Agent Skills
 
@@ -201,13 +239,15 @@ skills/sape-links-seo/
 ## MCP и финансовые ограничения
 
 Всё взаимодействие с платформой идёт через Sape Links MCP — размещённый streamable HTTP
-сервер: `https://mcp-links.sape.ru/mcp`. Аутентификация — OAuth при первом обращении,
-инструмент `authorize` вызывается сервером автоматически, вручную его дёргать не нужно.
+сервер: `https://mcp-links.sape.ru/mcp`. Аутентификация — OAuth при первом обращении: на
+странице входа пользователь вводит email аккаунта и API-токен из Паспорта; токены сервер
+обновляет сам.
 Подключение описано в `.mcp.json` (плагин) и в README (ручная установка).
 
 **Абсолютные запреты для агентов, работающих с этим репозиторием:**
 
-- Не вызывайте `purchase_placement`, `purchase_rent_placement` и `perform_placement_action`
+- Не вызывайте `purchase_placement`, `purchase_rent_placement`, `purchase_context_placement`
+  и `perform_placement_action`
   в тестах, проверках или «для проверки конвейера» — это реальные деньги пользователя.
 - Не коммитьте токены, cookies, логины, номера проектов и любые данные аккаунта: репозиторий
   публичный. В тексте навыка не должно быть примеров с настоящими идентификаторами.
@@ -217,7 +257,8 @@ skills/sape-links-seo/
 Правила, которые навык обязан соблюдать и которые нельзя ослаблять при правках: перед любой
 покупкой или действием с деньгами агент показывает цену, текущий баланс и остаток после
 покупки и запрашивает явное подтверждение. Для аренды дополнительно проговаривается, что
-платёж рекуррентный. Это ядро навыка, а не украшение.
+платёж рекуррентный. Эти правила живут в `llms.txt` (раздел «Траты») и копируются в навыки.
+Это ядро навыков, а не украшение.
 
 ## Плагин Claude Code
 

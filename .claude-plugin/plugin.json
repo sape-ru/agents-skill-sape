@@ -1,12 +1,18 @@
 {
   "name": "sape-links-seo",
-  "version": "1.2.1",
-  "description": "Покупка SEO-статей и ссылочных размещений на проверенных площадках-донорах через платформу Sape Links. Требуется подключённый Sape Links MCP-сервер (https://mcp-links.sape.ru/mcp).",
+  "version": "2.0.0",
+  "description": "Линкбилдинг через Sape Links: подключение MCP, проекты и анкоры, поиск доноров, покупка статейных размещений и арендных ссылок с подтверждением, Избранное, чёрный список, управление размещениями. Подключает Sape Links MCP (https://mcp-links.sape.ru/mcp).",
   "author": {
     "name": "Sape",
     "url": "https://sape.ru"
   },
   "homepage": "https://github.com/sape-ru/agents-skill-sape",
   "repository": "https://github.com/sape-ru/agents-skill-sape",
-  "keywords": ["seo", "backlinks", "link-building", "guest-posts", "sape"]
+  "keywords": [
+    "seo",
+    "backlinks",
+    "link-building",
+    "guest-posts",
+    "sape"
+  ]
 }
