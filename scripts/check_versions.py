@@ -4,10 +4,11 @@
     python3 scripts/check_versions.py --base origin/main
 
 Проверяет:
-- версия совпадает в skills/sape-links-seo/SKILL.md, .claude-plugin/plugin.json
-  и .claude-plugin/marketplace.json, описания в лимитах (общие проверки
-  scripts/package_skill.py: 1024 символа в SKILL.md, 200 в коротком описании);
-- таблица в VERSIONS.md содержит текущую версию навыка;
+- версия совпадает в SKILL.md каждого навыка, .claude-plugin/plugin.json,
+  .claude-plugin/marketplace.json и .codex-plugin/plugin.json, описания в лимитах
+  (общие проверки scripts/package_skill.py: 1024 символа в SKILL.md, 200 в коротком
+  описании для claude.ai);
+- таблица в VERSIONS.md содержит текущую версию каждого навыка;
 - в VERSIONS.md есть раздел `### X.Y.Z (дата)` — из него release-воркфлоу берёт
   заголовок и заметки релиза vX.Y.Z;
 - PR, меняющий файлы навыка или упаковки (skills/**, packaging/**), поднимает версию
@@ -27,7 +28,7 @@ SCRIPTS = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS))
 
 import package_skill
-from package_skill import ROOT, SKILL, SKILL_DIR, fail
+from package_skill import ROOT, fail
 
 
 def changed_files(base):
@@ -56,17 +57,18 @@ def parse_version(v):
     return tuple(int(p) for p in parts)
 
 
-def check_versions_md(version):
+def check_versions_md(version, names):
     path = ROOT / "VERSIONS.md"
     if not path.exists():
         fail("VERSIONS.md: файла нет — добавьте таблицу версий и раздел изменений")
     text = path.read_text(encoding="utf-8")
 
-    row = re.search(rf"^\|\s*{re.escape(SKILL)}\s*\|\s*([^\s|]+)\s*\|", text, re.M)
-    if not row:
-        fail(f"VERSIONS.md: в таблице нет строки навыка `{SKILL}`")
-    if row.group(1) != version:
-        fail(f"VERSIONS.md: в таблице версия {row.group(1)}, а в файлах навыка — {version}")
+    for name in names:
+        row = re.search(rf"^\|\s*{re.escape(name)}\s*\|\s*([^\s|]+)\s*\|", text, re.M)
+        if not row:
+            fail(f"VERSIONS.md: в таблице нет строки навыка `{name}`")
+        if row.group(1) != version:
+            fail(f"VERSIONS.md: у `{name}` в таблице версия {row.group(1)}, а в файлах навыков — {version}")
 
     if not re.search(rf"^### {re.escape(version)} \([^)]+\)\s*$", text, re.M):
         fail(f"VERSIONS.md: нет раздела '### {version} (дата)' — из него release-воркфлоу "
@@ -81,8 +83,9 @@ def check_bump(version, base, changed):
         fail(
             f"PR меняет файлы навыка или упаковки (skills/**, packaging/**), но версия "
             f"не поднята: {base_version} → {version}. Поднимите версию одинаково в "
-            "skills/sape-links-seo/SKILL.md, .claude-plugin/plugin.json и "
-            ".claude-plugin/marketplace.json и опишите изменения в VERSIONS.md."
+            "SKILL.md каждого навыка, .claude-plugin/plugin.json, "
+            ".claude-plugin/marketplace.json и .codex-plugin/plugin.json и опишите "
+            "изменения в VERSIONS.md."
         )
 
 
@@ -92,12 +95,10 @@ def main():
                     help="база для сравнения — ветка или коммит (по умолчанию origin/main)")
     args = ap.parse_args()
 
-    skill_text = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").replace("\r\n", "\n")
+    # Совпадение версий во всех файлах и лимиты описаний — как при сборке архивов.
+    version, skills = package_skill.validate_skills()
 
-    # Совпадение версий в трёх файлах и лимиты описаний — как при сборке архивов.
-    version, _ = package_skill.validate_skill(skill_text)
-
-    check_versions_md(version)
+    check_versions_md(version, list(skills))
     check_bump(version, args.base, changed_files(args.base))
 
     print(f"ок: версия {version} согласована, VERSIONS.md актуален")
