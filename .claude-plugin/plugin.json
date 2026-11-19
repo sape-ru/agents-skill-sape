@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/sape-ru/agents-skill-sape",
   "repository": "https://github.com/sape-ru/agents-skill-sape",
+  "license": "MIT",
   "keywords": [
     "seo",
     "backlinks",
