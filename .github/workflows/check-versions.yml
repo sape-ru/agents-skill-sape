@@ -12,6 +12,7 @@ on:
       - "skills/**"
       - "VERSIONS.md"
       - ".claude-plugin/**"
+      - ".codex-plugin/**"
       - "packaging/**"
       - "scripts/**"
 
