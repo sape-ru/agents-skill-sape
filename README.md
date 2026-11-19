@@ -88,10 +88,12 @@ claude plugin install sape-links-seo --marketplace sape-ru/agents-skill-sape
 
 ```bash
 codex plugin marketplace add sape-ru/agents-skill-sape
+codex plugin add sape-links-seo@sape
 ```
 
-Затем в сессии Codex откройте `/plugins` и установите `sape-links-seo` — он ставит оба навыка
-и подключение к Sape Links MCP. Новые навыки и инструменты появятся в новой сессии.
+Плагин `sape-links-seo` ставит оба навыка и подключение к Sape Links MCP. Вместо второй команды
+можно в сессии Codex открыть `/plugins` и установить плагин оттуда. Новые навыки и инструменты
+появятся в новой сессии.
 
 ### Cursor, Gemini CLI, OpenCode, Windsurf и другие агенты
 
@@ -125,10 +127,11 @@ npx skills add sape-ru/agents-skill-sape
 - **Подключение к Sape:** добавьте `https://mcp-links.sape.ru/mcp` как пользовательский
   коннектор (приложение) в настройках ChatGPT. Сейчас ChatGPT разрешает свои коннекторы не на
   всех тарифах — в рабочих пространствах это включает администратор.
-- **Навыки:** где в ChatGPT доступны навыки, загрузите архивы
+- **Навыки:** где в ChatGPT доступны навыки, скачайте архивы со
+  [страницы релизов](https://github.com/sape-ru/agents-skill-sape/releases/latest) —
   [`sape-links-seo.zip`](https://github.com/sape-ru/agents-skill-sape/releases/latest/download/sape-links-seo.zip)
   и [`sape-link-placements.zip`](https://github.com/sape-ru/agents-skill-sape/releases/latest/download/sape-link-placements.zip)
-  в разделе Skills (*Upload from your computer*). Если навыков нет, агент всё равно работает с
+  — и загрузите каждый в разделе Skills (*Upload from your computer*). Если навыков нет, агент всё равно работает с
   Sape через коннектор, но без подсказок навыков.
 
 > Если Sape Links MCP у вас уже подключён вручную, а потом вы поставили плагин, отключите одно
@@ -158,7 +161,7 @@ python3 scripts/package_skill.py   # архивы появятся в dist/
 | Плагин в Claude Code | `claude plugin update sape-links-seo@sape` или `/plugin` → **Update now**. Чтобы обновлялся сам: `/plugin` → **Marketplaces** → `sape` → **Enable auto-update** |
 | Плагин в Claude Desktop, claude.ai | откройте плагин в *Customize → Plugins* и обновите его |
 | Плагин в Codex | `codex plugin marketplace upgrade sape`, затем новая сессия |
-| `npx skills` | `npx skills check` — есть ли обновления, `npx skills update` — обновить |
+| `npx skills` | `npx skills update` (для навыков, поставленных с `-g`, — `npx skills update -g`) |
 | Архивы (claude.ai, ChatGPT, вручную) | скачайте архивы заново по ссылкам выше и загрузите поверх старых |
 
 Новая версия начинает работать в новой сессии агента. Что изменилось — в [`VERSIONS.md`](VERSIONS.md)
@@ -175,10 +178,11 @@ example.com и купи гостевой пост до 5000 ₽.»* Навык �
 ## Содержимое репозитория
 
 ```
-agents-skill-sape-seo/
+agents-skill-sape/
 ├── README.md                              # этот файл (уровень репо, не входит в пакет навыка)
 ├── AGENTS.md                              # правила для AI-агентов, работающих в репозитории
 ├── CLAUDE.md                              # отсылка к AGENTS.md для Claude Code (импорт @AGENTS.md)
+├── LICENSE                                # лицензия MIT
 ├── VERSIONS.md                            # версии навыков и заметки релизов (по нему навыки проверяют обновления)
 ├── .gitignore
 ├── .claude-plugin/
@@ -204,11 +208,13 @@ agents-skill-sape-seo/
 └── skills/
     ├── sape-links-seo/                    # основной навык
     │   ├── SKILL.md
+    │   ├── evals/                         # сценарии проверки поведения (в архивы не входят)
     │   └── references/
     │       ├── tools.md                   # все инструменты MCP с параметрами
     │       └── placement_actions.md       # действия и статусы размещений
     └── sape-link-placements/              # навык по задаче: подбор и покупка
         ├── SKILL.md
+        ├── evals/
         └── references/
             └── similar-sites.md           # как искать похожие площадки
 ```
@@ -247,3 +253,6 @@ workflow упадёт с ошибкой. Повторный запуск рел�
 - Документация API Sape Links: [https://api-links.sape.ru/api/](https://api-links.sape.ru/api/)
 - Приложение Sape Links: [https://api-links.sape.ru](https://api-links.sape.ru)
 
+## Лицензия
+
+[MIT](LICENSE)

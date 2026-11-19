@@ -24,8 +24,7 @@ claude.ai и ChatGPT — ZIP-архивы из релиза. Как ставит
 - **Название**: Sape Links SEO
 - **GitHub**: [sape-ru/agents-skill-sape](https://github.com/sape-ru/agents-skill-sape)
 - **Владелец**: Sape ([sape.ru](https://sape.ru))
-- **Лицензия**: файла LICENSE в репозитории нет. Не придумывайте лицензию и не добавляйте её
-  без явной просьбы.
+- **Лицензия**: MIT, файл `LICENSE`. Поле `license` в обоих `plugin.json` держите таким же.
 - **Язык**: документация, навык и заметки релизов — русский; коммиты — английский.
 
 ## Структура репозитория
@@ -35,6 +34,7 @@ agents-skill-sape/
 ├── AGENTS.md                              # этот файл: правила для AI-агентов
 ├── CLAUDE.md                              # обёртка с импортом @AGENTS.md для Claude Code
 ├── README.md                              # документация репозитория (не входит в пакет навыка)
+├── LICENSE                                # MIT
 ├── VERSIONS.md                            # версии навыков и заметки релизов; по нему навыки проверяют обновления
 ├── .mcp.json                              # подключение Sape Links MCP в составе плагина (Claude и Codex)
 ├── .claude-plugin/
@@ -150,8 +150,8 @@ python3 scripts/validate_skills.py                    # стандарт нав�
 ## Релизный конвейер
 
 `release.yml` запускается на push в `main`, если изменился один из путей:
-`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `skills/**`, `packaging/**`,
-`VERSIONS.md`. Есть и ручной запуск — `workflow_dispatch`, например чтобы пересобрать архивы.
+`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`,
+`skills/**`, `packaging/**`, `VERSIONS.md`. Есть и ручной запуск — `workflow_dispatch`, например чтобы пересобрать архивы.
 
 Порядок шагов:
 
@@ -292,7 +292,8 @@ claude plugin install sape-links-seo --marketplace sape-ru/agents-skill-sape
 
 Codex читает свой манифест `.codex-plugin/plugin.json` (поля `skills: ./skills/`,
 `mcpServers: ./.mcp.json`) и каталог `.agents/plugins/marketplace.json`. Установка —
-`codex plugin marketplace add sape-ru/agents-skill-sape`, затем `/plugins` в сессии;
+`codex plugin marketplace add sape-ru/agents-skill-sape`, затем `codex plugin add sape-links-seo@sape`
+или `/plugins` в сессии;
 обновление — `codex plugin marketplace upgrade sape`. Имя, описание и версию в манифесте Codex
 держите такими же, как в `.claude-plugin/plugin.json`.
 
