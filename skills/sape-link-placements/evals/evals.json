@@ -135,7 +135,7 @@
       "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
       "fixture": {
         "format_options": {
-          "news": "текст даёт рекламодатель",
+          "news": "текст даёт заказчик",
           "review": "пишет вебмастер, +3 000 ₽"
         }
       },
