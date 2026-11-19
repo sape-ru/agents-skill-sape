@@ -5,19 +5,26 @@
 ## Обзор репозитория
 
 Репозиторий содержит **Agent Skills** — портативные пакеты навыков по открытому стандарту
-[Agent Skills](https://agentskills.io). Сейчас в нём один навык — `sape-links-seo`: покупка
-SEO-статей и ссылочных размещений на площадках-донорах через платформу
-[Sape](https://sape.ru).
+[Agent Skills](https://agentskills.io) для биржи ссылок [Sape](https://sape.ru). Навыков два:
 
-Одновременно репозиторий служит **маркетплейсом плагинов Claude** (`.claude-plugin/`),
-поэтому у него две аудитории: агенты, устанавливающие навык ZIP-архивом, и Claude Code,
-ставящий плагин.
+- `sape-links-seo` — основной: подключение, форматы, поиск, покупка и управление
+  размещениями;
+- `sape-link-placements` — навык по задаче: подбор доноров и покупка, опирается на
+  механику из `sape-links-seo`.
+
+Общие правила для агентов (подключение, траты, баланс, ошибки, честность) живут в `llms.txt`
+и копируются в каждый навык скриптом — см. «Общие правила навыков».
+
+Одновременно репозиторий служит **маркетплейсом плагинов** для Claude (`.claude-plugin/`) и
+Codex (`.codex-plugin/`, `.agents/plugins/`). Аудитории: Claude Code, Claude Desktop и Codex
+ставят плагин (навыки + MCP); Cursor и другие агенты — `npx skills add` (папка `skills/`);
+claude.ai и ChatGPT — ZIP-архивы из релиза. Как ставить и обновлять в каждом агенте — README,
+разделы «Установка» и «Обновление».
 
 - **Название**: Sape Links SEO
 - **GitHub**: [sape-ru/agents-skill-sape](https://github.com/sape-ru/agents-skill-sape)
 - **Владелец**: Sape ([sape.ru](https://sape.ru))
-- **Лицензия**: файла LICENSE в репозитории нет. Не придумывайте лицензию и не добавляйте её
-  без явной просьбы.
+- **Лицензия**: MIT, файл `LICENSE`. Поле `license` в обоих `plugin.json` держите таким же.
 - **Язык**: документация, навык и заметки релизов — русский; коммиты — английский.
 
 ## Структура репозитория
@@ -27,24 +34,46 @@ agents-skill-sape/
 ├── AGENTS.md                              # этот файл: правила для AI-агентов
 ├── CLAUDE.md                              # обёртка с импортом @AGENTS.md для Claude Code
 ├── README.md                              # документация репозитория (не входит в пакет навыка)
-├── VERSIONS.md                            # версия навыка и заметки релизов
-├── .mcp.json                              # подключение Sape Links MCP в составе плагина
+├── LICENSE                                # MIT
+├── VERSIONS.md                            # версии навыков и заметки релизов; по нему навыки проверяют обновления
+├── .mcp.json                              # подключение Sape Links MCP в составе плагина (Claude и Codex)
 ├── .claude-plugin/
 │   ├── marketplace.json                   # каталог плагинов Claude (маркетплейс «sape»)
 │   └── plugin.json                        # манифест плагина sape-links-seo
+├── .codex-plugin/
+│   └── plugin.json                        # манифест плагина для Codex: skills/ и .mcp.json
+├── .agents/plugins/
+│   └── marketplace.json                   # каталог плагинов Codex (маркетплейс «sape»)
 ├── .github/workflows/
 │   ├── release.yml                        # тег vX.Y.Z, сборка архивов, GitHub Release
-│   └── check-versions.yml                 # PR-проверки версий, описаний и бампа
+│   ├── check-versions.yml                 # PR-проверки версий, описаний и бампа
+│   └── check-skills.yml                   # PR и push: правила синхронны, навыки по стандарту
 ├── packaging/
-│   └── claude-web-description.txt         # короткое описание для claude.ai (≤ 200 символов)
+│   └── claude-web-descriptions.json       # короткие описания навыков для claude.ai (≤ 200 символов)
+├── llms.txt                               # общие правила для агентов — источник для навыков
 ├── scripts/
 │   ├── package_skill.py                   # проверки и сборка ZIP-архивов
-│   └── check_versions.py                  # проверки для PR
-└── skills/sape-links-seo/
-    ├── SKILL.md                           # метаданные и инструкции workflow
-    └── references/
-        └── placement_actions.md           # действия и статусы размещений
+│   ├── check_versions.py                  # проверки для PR
+│   ├── sync_rules.py                      # копирует правила из llms.txt в навыки
+│   └── validate_skills.py                 # проверка навыков по стандарту
+└── skills/
+    ├── sape-links-seo/
+    │   ├── SKILL.md                       # основной навык
+    │   ├── references/
+    │   │   ├── tools.md                   # все инструменты MCP с параметрами
+    │   │   └── placement_actions.md       # действия и статусы размещений
+    │   └── evals/evals.json               # сценарии проверки поведения
+    └── sape-link-placements/
+        ├── SKILL.md                       # навык по задаче
+        ├── references/
+        │   └── similar-sites.md           # поиск похожих площадок
+        └── evals/evals.json               # сценарии проверки поведения
 ```
+
+`evals/evals.json` — сценарии проверки поведения навыка: запрос пользователя, синтетические
+данные (`fixture`), ожидаемое поведение и проверяемые утверждения (`assertions`). Прогоняются
+вручную в новом контексте агента с выключенными покупками — после любой заметной правки
+навыка. Меняете поведение навыка — обновите или добавьте сценарий.
 
 ## Проверки и сборка
 
@@ -53,14 +82,22 @@ agents-skill-sape/
 
 ```bash
 python3 scripts/package_skill.py --version            # сверить версии и напечатать её
-python3 scripts/package_skill.py                      # собрать 4 ZIP-архива в dist/
+python3 scripts/package_skill.py                      # собрать 8 ZIP-архивов (по 4 на навык) в dist/
 python3 scripts/package_skill.py --output /tmp/out    # собрать в другую папку
 python3 scripts/check_versions.py --base origin/main  # то же, что проверка на PR
+python3 scripts/sync_rules.py --check                 # блоки правил совпадают с llms.txt
+python3 scripts/validate_skills.py                    # стандарт навыков и правила репозитория
 ```
 
-`package_skill.py` проверяет, что версия совпадает в `SKILL.md`, `.claude-plugin/plugin.json`
+`validate_skills.py` проверяет каждый навык: `name` совпадает с папкой, `description` до 1024
+символов, `version` совпадает с `plugin.json`, `SKILL.md` не длиннее 500 строк, каждый файл из
+`references/` упомянут в своём `SKILL.md`, `evals/evals.json` (если есть) — валидный JSON.
+Обе проверки запускает workflow `check-skills.yml` на PR и push.
+
+`package_skill.py` проверяет, что версия совпадает в `SKILL.md` каждого навыка, `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`
 и `.claude-plugin/marketplace.json`, что `description` в `SKILL.md` не длиннее 1024 символов,
-а `packaging/claude-web-description.txt` — одной строкой не длиннее 200 символов.
+а у каждого навыка есть короткое описание в `packaging/claude-web-descriptions.json` — одной
+строкой не длиннее 200 символов.
 
 `check_versions.py` дополнительно требует, чтобы таблица и раздел `### X.Y.Z (дата)` в
 `VERSIONS.md` соответствовали текущей версии, и чтобы PR, меняющий `skills/**` или
@@ -68,7 +105,7 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 
 Проверки, которых нет автоматически и которые делаются глазами:
 
-- JSON в `.claude-plugin/` валиден — `python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))"`
+- JSON в `.claude-plugin/`, `.codex-plugin/` и `.agents/plugins/` валиден — `python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))"`
   (и то же для `marketplace.json`).
 - YAML workflow-файлов ничем не валидируется: после правок в `.github/workflows/` нужен
   пробный запуск (PR или `workflow_dispatch`).
@@ -77,14 +114,16 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 
 ## Версионирование
 
-Версия у репозитория одна — она же версия навыка. Хранится в четырёх местах и должна
+Версия у репозитория одна — она же версия навыка. Хранится в шести местах и должна
 совпадать везде:
 
 | Место | Поле |
 |---|---|
 | `skills/sape-links-seo/SKILL.md` | `version` во frontmatter |
+| `skills/sape-link-placements/SKILL.md` | `version` во frontmatter (сверяет `validate_skills.py`) |
 | `.claude-plugin/plugin.json` | `version` |
 | `.claude-plugin/marketplace.json` | `version` у плагина `sape-links-seo` |
+| `.codex-plugin/plugin.json` | `version` |
 | `VERSIONS.md` | строка навыка в таблице |
 
 Правила semver для этого репозитория:
@@ -100,7 +139,7 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 
 1. Версия поднимается **в том же PR**, что и изменение навыка или упаковки. Отдельным
    «догоняющим» PR — нельзя.
-2. Источник истины — `plugin.json`; остальные три места скрипт сверяет с ним.
+2. Источник истины — `plugin.json`; остальные места скрипты сверяют с ним.
 3. Теги ставит **только** релизный workflow. Не создавайте теги вручную (`git tag`,
    `git push --tags`) и не двигайте существующие: архивы собираются из коммита тега, поэтому
    сдвинутый тег выпустит не тот код.
@@ -111,8 +150,8 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 ## Релизный конвейер
 
 `release.yml` запускается на push в `main`, если изменился один из путей:
-`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `skills/**`, `packaging/**`,
-`VERSIONS.md`. Есть и ручной запуск — `workflow_dispatch`, например чтобы пересобрать архивы.
+`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`,
+`skills/**`, `packaging/**`, `VERSIONS.md`. Есть и ручной запуск — `workflow_dispatch`, например чтобы пересобрать архивы.
 
 Порядок шагов:
 
@@ -125,7 +164,7 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 4. **Заметки и заголовок.** Берутся из раздела `### X.Y.Z (дата)` в `VERSIONS.md` на коммите
    релиза. Заголовок — `vX.Y.Z — <первая строка раздела>` с обрезкой до 100 символов. Если
    раздела нет, тело релиза будет заглушкой `Release X.Y.Z` — это деградация, а не ошибка.
-5. **Архивы и публикация.** Собираются 4 ZIP из коммита релиза, создаётся релиз (если его нет)
+5. **Архивы и публикация.** Собираются 8 ZIP (по 4 на навык) из коммита релиза, создаётся релиз (если его нет)
    и архивы загружаются с `--clobber`, поэтому повторный запуск безопасен и заменяет ассеты.
 
 `check-versions.yml` работает на PR (кроме draft и `dependabot`) и публикацией не управляет:
@@ -135,6 +174,21 @@ python3 scripts/check_versions.py --base origin/main  # то же, что про
 workflow запускается по путям, и PR без правок в навыке не отчитался бы статусом. Поэтому
 PR-проверка — обязательный шаг процесса, а не блокировка merge. Если прямой push всё же
 случился, единственная страховка — шаг 1 релизного workflow.
+
+## Общие правила навыков
+
+`llms.txt` — единственный источник правил для агентов. Раздел `## Правила для агентов`
+копируется в каждый `SKILL.md` между маркерами `<!-- sape-rules:start -->` и
+`<!-- sape-rules:end -->`.
+
+- Блок между маркерами **не редактируйте** в навыке: правьте `llms.txt` и запускайте
+  `python3 scripts/sync_rules.py`.
+- В каждом навыке ровно один блок маркеров; новый навык начинается с пустой пары маркеров.
+- Если блок правил и остальной текст навыка расходятся, агент следует блоку правил.
+
+Правило 7 «Обновления навыков» — мягкая проверка версии: раз за сессию навык сверяет свою
+`version` с `VERSIONS.md` в `main` и одной строкой в конце ответа предлагает обновиться.
+Ссылка в правиле ведёт на раздел README «Обновление» — не переименовывайте этот заголовок.
 
 ## Стандарт Agent Skills
 
@@ -194,20 +248,22 @@ skills/sape-links-seo/
 в каких ситуациях его подключать (словами пользователя, а не списком синонимов) и, если есть,
 жёсткое правило, которое должно сработать до чтения тела.
 
-При изменении `description` в `SKILL.md` обновите и `packaging/claude-web-description.txt` —
-короткое описание для claude.ai (≤ 200 символов, одна строка). Оно подменяет `description`
-в архиве `sape-links-seo-claude-web.zip`.
+При изменении `description` в `SKILL.md` обновите и строку навыка в
+`packaging/claude-web-descriptions.json` — короткое описание для claude.ai (≤ 200 символов,
+одна строка). Оно подменяет `description` в архиве `<навык>-claude-web.zip`.
 
 ## MCP и финансовые ограничения
 
 Всё взаимодействие с платформой идёт через Sape Links MCP — размещённый streamable HTTP
-сервер: `https://mcp-links.sape.ru/mcp`. Аутентификация — OAuth при первом обращении,
-инструмент `authorize` вызывается сервером автоматически, вручную его дёргать не нужно.
+сервер: `https://mcp-links.sape.ru/mcp`. Аутентификация — OAuth при первом обращении: на
+странице входа пользователь вводит email аккаунта и API-токен из Паспорта; токены сервер
+обновляет сам.
 Подключение описано в `.mcp.json` (плагин) и в README (ручная установка).
 
 **Абсолютные запреты для агентов, работающих с этим репозиторием:**
 
-- Не вызывайте `purchase_placement`, `purchase_rent_placement` и `perform_placement_action`
+- Не вызывайте `purchase_placement`, `purchase_rent_placement`, `purchase_context_placement`
+  и `perform_placement_action`
   в тестах, проверках или «для проверки конвейера» — это реальные деньги пользователя.
 - Не коммитьте токены, cookies, логины, номера проектов и любые данные аккаунта: репозиторий
   публичный. В тексте навыка не должно быть примеров с настоящими идентификаторами.
@@ -217,21 +273,29 @@ skills/sape-links-seo/
 Правила, которые навык обязан соблюдать и которые нельзя ослаблять при правках: перед любой
 покупкой или действием с деньгами агент показывает цену, текущий баланс и остаток после
 покупки и запрашивает явное подтверждение. Для аренды дополнительно проговаривается, что
-платёж рекуррентный. Это ядро навыка, а не украшение.
+платёж рекуррентный. Эти правила живут в `llms.txt` (раздел «Траты») и копируются в навыки.
+Это ядро навыков, а не украшение.
 
-## Плагин Claude Code
+## Плагины Claude и Codex
 
 Репозиторий — маркетплейс плагинов: `.claude-plugin/marketplace.json` (имя `sape`) описывает
-плагин `sape-links-seo`, чей `source` — корень репозитория. `.mcp.json` подключает MCP-сервер
-вместе с плагином.
+плагин `sape-links-seo`, чей `source` — корень репозитория. Навыки плагин берёт из `skills/`
+(все папки сразу), `.mcp.json` подключает MCP-сервер вместе с плагином.
 
 ```bash
-/plugin marketplace add sape-ru/agents-skill-sape
-/plugin install sape-links-seo@sape
+claude plugin install sape-links-seo --marketplace sape-ru/agents-skill-sape
 ```
 
-Плагины сторонних маркетплейсов не обновляются автоматически — обновление вручную через
-`/plugin` → **Update now** или `claude plugin update sape-links-seo@sape`.
+Плагины сторонних маркетплейсов по умолчанию не обновляются сами: пользователь обновляет через
+`/plugin` → **Update now** или `claude plugin update sape-links-seo@sape`, либо включает
+автообновление маркетплейса (`/plugin` → **Marketplaces** → `sape` → **Enable auto-update**).
+
+Codex читает свой манифест `.codex-plugin/plugin.json` (поля `skills: ./skills/`,
+`mcpServers: ./.mcp.json`) и каталог `.agents/plugins/marketplace.json`. Установка —
+`codex plugin marketplace add sape-ru/agents-skill-sape`, затем `codex plugin add sape-links-seo@sape`
+или `/plugins` в сессии;
+обновление — `codex plugin marketplace upgrade sape`. Имя, описание и версию в манифесте Codex
+держите такими же, как в `.claude-plugin/plugin.json`.
 
 Важно для документации: на claude.ai и в Claude Desktop установка плагина **не подключает**
 MCP-сервер автоматически. Коннектор появляется в состоянии «Not added», его нужно добавить и
@@ -240,19 +304,21 @@ MCP-сервер автоматически. Коннектор появляет
 
 ## Упаковка и архивы
 
-`package_skill.py` собирает 4 архива — по два содержимого в двух именах:
+`package_skill.py` собирает для каждого навыка из `skills/` 4 архива — по два содержимого в
+двух именах (сейчас навыков два, архивов 8):
 
 | Архив | Содержимое |
 |---|---|
-| `sape-links-seo-<версия>.zip` | исходный навык без изменений |
-| `sape-links-seo.zip` | то же, для постоянной ссылки `releases/latest/download/...` |
-| `sape-links-seo-claude-web-<версия>.zip` | то же, но с коротким `description` из `packaging/` |
-| `sape-links-seo-claude-web.zip` | то же, для постоянной ссылки |
+| `<навык>-<версия>.zip` | исходный навык без изменений (Cursor, ChatGPT, ручная установка) |
+| `<навык>.zip` | то же, для постоянной ссылки `releases/latest/download/...` |
+| `<навык>-claude-web-<версия>.zip` | то же, но с коротким `description` из `packaging/` (claude.ai) |
+| `<навык>-claude-web.zip` | то же, для постоянной ссылки |
 
 Требования к архивам: папка навыка — **корень** архива (как требует стандарт), дата файлов
 фиксирована (одинаковый исходник даёт одинаковый архив), `dist/` в `.gitignore` и в
-репозиторий не попадает. Архивы собираются только из `skills/sape-links-seo/`, поэтому
-правки README, AGENTS.md и скриптов на содержимое релиза не влияют.
+репозиторий не попадает. Папка `evals/` в архивы не попадает — это проверки для
+разработчиков. Архивы собираются только из `skills/`, поэтому правки README, AGENTS.md и
+скриптов на содержимое релиза не влияют.
 
 ## Git-процесс
 
@@ -269,27 +335,29 @@ MCP-сервер автоматически. Коннектор появляет
 
 Чеклист перед PR:
 
-- [ ] Версия поднята одинаково в `SKILL.md`, `plugin.json`, `marketplace.json`, `VERSIONS.md`
+- [ ] Версия поднята одинаково в `SKILL.md`, обоих `plugin.json`, `marketplace.json`, `VERSIONS.md`
       (если менялись `skills/**` или `packaging/**`)
 - [ ] В `VERSIONS.md` есть раздел `### X.Y.Z (дата)`, его первая строка годится в заголовок
 - [ ] Короткое описание для claude.ai обновлено, если менялся `description`
-- [ ] JSON в `.claude-plugin/` валиден
+- [ ] JSON в `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/` валиден
 - [ ] Каждый файл из `references/` упомянут в `SKILL.md`
 - [ ] Нет секретов, токенов и реальных идентификаторов аккаунта
 - [ ] `python3 scripts/check_versions.py --base origin/main` проходит
 
 ## Проверка обновлений
 
-`VERSIONS.md` — публичная точка сверки версий: агенты могут сравнить указанную там версию с
-локальной копией навыка. Если добавляете инструкции про обновление в навык или README,
-используйте этот файл, а не `plugin.json`:
+`VERSIONS.md` в `main` — публичная точка сверки версий: навыки по правилу 7 в `llms.txt` раз
+за сессию сравнивают его таблицу со своей `version`. Поэтому таблица должна быть точной, а
+формат строк — прежним (`| навык | X.Y.Z | дата |`). Если добавляете инструкции про
+обновление, используйте этот файл, а не `plugin.json`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sape-ru/agents-skill-sape/main/VERSIONS.md
 ```
 
-Обновление пользователь делает сам: `git pull` (если репозиторий склонирован) или повторная
-установка архива/плагина. Не обещайте автообновление — у сторонних маркетплейсов его нет.
+Обновление пользователь делает сам — способы для каждого агента в README, раздел
+«Обновление». Само обновляется только плагин в Claude Code, и то если пользователь включил
+автообновление маркетплейса; в остальных местах автообновление не обещайте.
 
 ## Только для Claude Code
 

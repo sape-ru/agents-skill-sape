@@ -15,6 +15,7 @@ on:
     paths:
       - ".claude-plugin/plugin.json"
       - ".claude-plugin/marketplace.json"
+      - ".codex-plugin/plugin.json"
       - "skills/**"
       - "packaging/**"
       - "VERSIONS.md"
@@ -91,11 +92,13 @@ jobs:
           VERSION="${{ steps.ver.outputs.version }}"
           {
             echo ""
-            echo "## ZIP-архивы навыка"
+            echo "## ZIP-архивы навыков"
             echo ""
-            echo "- \`sape-links-seo-claude-web.zip\` — для загрузки в claude.ai и Claude Desktop (*Customize → Skills → Upload a skill*): то же содержимое, но с коротким описанием в пределах лимита claude.ai (200 символов)."
-            echo "- \`sape-links-seo.zip\` — исходный навык без изменений для агентов со стандартом [Agent Skills](https://agentskills.io): Claude Code, Cursor, OpenAI Codex, Gemini CLI."
-            echo "- Копии с версией в имени (\`sape-links-seo-$VERSION.zip\`) — когда нужна конкретная версия; копии без версии — постоянные ссылки \`releases/latest/download/...\`."
+            echo "По архиву на каждый навык из \`skills/\`:"
+            echo ""
+            echo "- \`<навык>-claude-web.zip\` — для claude.ai и Claude Desktop (*Customize → Skills → Upload a skill*): то же содержимое, но с коротким описанием в пределах лимита claude.ai (200 символов)."
+            echo "- \`<навык>.zip\` — исходный навык для Cursor, ChatGPT и других агентов со стандартом [Agent Skills](https://agentskills.io)."
+            echo "- Копии с версией в имени (\`<навык>-$VERSION.zip\`) — когда нужна конкретная версия; копии без версии — постоянные ссылки \`releases/latest/download/...\`."
             echo ""
             echo "Установка архива не подключает Sape Links MCP и не настраивает учётные данные — см. README."
           } >> release-notes.md

@@ -1,0 +1,147 @@
+{
+  "skill_name": "sape-links-seo",
+  "metadata": {
+    "purpose": "Проверить механику: выбор формата и инструмента, правила трат, аренда и контекстные, действия с размещениями, ошибки.",
+    "contract_checked_at": "2026-11-13",
+    "how_to_run": "Каждый сценарий — в новом контексте агента, покупки выключены. Данные в fixture — синтетические."
+  },
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Подключи Sape.",
+      "interface": "клиент с поддержкой удалённого MCP, вход не выполнен",
+      "fixture": {
+        "signed_in": false
+      },
+      "expected_output": "Сам добавляет сервер https://mcp-links.sape.ru/mcp, предупреждает, что на странице входа нужны email и API-токен из Паспорта, ждёт входа, затем вызывает get_user_info и сообщает только статус и баланс.",
+      "assertions": [
+        "Не просит вставить токен в чат",
+        "Не вызывает инструменты в цикле до входа",
+        "Проверяет подключение через get_user_info"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Найди что-нибудь интересное из арендных.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {
+        "project_id": 1,
+        "first_url_id": 10
+      },
+      "expected_output": "Ищет через search_rent_sites по url_id, называет формат (блочные ссылки) и что оплата помесячная.",
+      "assertions": [
+        "Не использует search_sites для аренды",
+        "Передаёт url_id, а не только project_id"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Нужны ссылки на мой сайт.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {},
+      "expected_output": "Не угадывает формат: спрашивает, нужны статейные размещения (разовая оплата) или арендные ссылки (помесячно).",
+      "assertions": [
+        "Задаёт один вопрос о типе размещения до поиска"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Хочу niche edit ссылки.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {},
+      "expected_output": "Уточняет, что имеется в виду: вставка ссылки в существующий текст (контекстные) или арендная ссылка в блоке (блочные); действует по ответу.",
+      "assertions": [
+        "Не выбирает формат молча",
+        "Называет оба варианта терминами Sape"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Купи контекстную ссылку на этой странице, вот фрагмент из поиска.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {
+        "snippet": "<p>Сервисы для учёта расходов помогают малому бизнесу.</p>",
+        "price_month_rub": 400,
+        "balance_rub": 5000
+      },
+      "expected_output": "Показывает фрагмент и анкор, цену за месяц, баланс и на сколько месяцев хватит; после подтверждения передаёт full_text без изменений, а text — фразу из фрагмента дословно, без #a#.",
+      "assertions": [
+        "full_text совпадает с фрагментом символ в символ",
+        "text — подстрока фрагмента без разметки #a#",
+        "Покупает только после подтверждения сметы"
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Да, покупай все пять.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {
+        "estimate_shown": false,
+        "candidates": 5
+      },
+      "expected_output": "Не покупает: сначала показывает смету по пяти площадкам (свежие цены из get_site_info, итог, баланс, остаток) и просит подтвердить именно её.",
+      "assertions": [
+        "Не считает «покупай» без показанной сметы подтверждением",
+        "Берёт свежие цены через get_site_info"
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Покупка второй площадки упала по таймауту, повтори.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {
+        "timed_out_purchase": true
+      },
+      "expected_output": "Не повторяет сразу: проверяет get_project_placements, не прошла ли покупка, сообщает результат и только потом предлагает повтор со сметой.",
+      "assertions": [
+        "Сначала вызывает get_project_placements",
+        "Не повторяет покупку автоматически"
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Заморозь арендные ссылки по проекту на месяц.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {
+        "rent_placements_approved": 3
+      },
+      "expected_output": "Объясняет, что sleep_manual_seo останавливает ссылки и списания, разморозка — unsleep_manual_seo и требует баланса; просит подтверждения и только потом вызывает действие.",
+      "assertions": [
+        "Использует sleep_manual_seo, а не terminate_seo",
+        "Получает подтверждение до perform_placement_action"
+      ],
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Найди площадку example-donor.ru в Sape.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {},
+      "expected_output": "Вызывает search_sites с donor_domain=example-donor.ru.",
+      "assertions": [
+        "Использует параметр donor_domain",
+        "Не использует несуществующий параметр site_url"
+      ],
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "Пополни баланс на 5 000 ₽.",
+      "interface": "Sape Links MCP: https://mcp-links.sape.ru/mcp",
+      "fixture": {},
+      "expected_output": "Объясняет, что через MCP пополнить нельзя, даёт ссылку https://passport.sape.ru/deposit/.",
+      "assertions": [
+        "Не пытается пополнить баланс",
+        "Даёт ссылку на пополнение"
+      ],
+      "files": []
+    }
+  ]
+}
