@@ -8,7 +8,7 @@
 |---|---|---|
 | `list_projects` | Список проектов с пагинацией, сортировкой и фильтрами; без аргументов — первая страница | `page`, `limit`, `order_by`, `order_type`, `project_filter`, `projects_ids` |
 | `create_project` | Создать проект для домена; заодно создаёт первый URL и анкор по умолчанию | `domain`*, `name` |
-| `add_article` | Загрузить статью рекламодателя (формат «Статья», `news`); возвращает `articleId` и `urlId` | `project_id`*, `url`*, `title`*, `body`*, `meta_title`*, `meta_description`, `meta_keywords`, `is_comments_disabled`, `limit_max_usages` |
+| `add_article` | Загрузить статью заказчика (формат «Статья», `news`); возвращает `articleId` и `urlId` | `project_id`*, `url`*, `title`*, `body`*, `meta_title`*, `meta_description`, `meta_keywords`, `is_comments_disabled`, `limit_max_usages` |
 | `add_texts` | Добавить продвигаемые URL с анкорами (`#a#...#/a#`); возвращает `urlId` и ID текстов | `project_id`*, `urls_texts`* (`url`, `texts[].text`, `keywords`) |
 | `get_project_content_list` | Статьи и тексты проекта: статусы, тип, URL, поиск по подстроке | `project_id`, `creation_source`, `substring_text`, `url_ids`, `content_type`, `status`, `content_status_ids`, `from`, `limit`, `order_by`, `order_direction`, `async_url_id`, `show_async_content_load` |
 | `set_limits` | Лимит использования анкоров — по ID контента или для всех анкоров URL; `0` — без ограничений | `content_ids`, `url_id`, `limit` |

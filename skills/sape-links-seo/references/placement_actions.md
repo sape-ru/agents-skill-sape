@@ -20,7 +20,7 @@ perform_placement_action(placement_ids=[PLACEMENT_ID, ...], action="ACTION_NAME"
 |---------------------------------|-------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | `approve_seo`                   | Одобрить размещение после проверки опубликованной страницы. Помечает размещение как успешно завершённое.                         | `STATUS_PLACEMENT_CHECK`                                                                      | `STATUS_APPROVED`               | Доступно только на финальной стадии проверки.                                                                               |
 | `approve_content_seo`           | Принять контент от вебмастера (для форматов, требующих одобрения контента).                                              | `STATUS_ON_CONTENT_APPROVAL`, `STATUS_PLACEMENT_ARBITRATION`                                  | `STATUS_ON_PLACEMENT_GUARANTEED`| После одобрения размещение переходит в гарантированное состояние. Обычно для форматов `review`, `link` или `archive`.       |
-| `approve_from_arbitration_seo`  | Одобрить размещение, переданное в арбитраж, разрешая спор в пользу рекламодателя.                                        | `STATUS_PLACEMENT_ARBITRATION`                                                                | `STATUS_APPROVED`               | Используется, когда модератор или система решает в пользу рекламодателя.                                                    |
+| `approve_from_arbitration_seo`  | Одобрить размещение, переданное в арбитраж, разрешая спор в пользу заказчика.                                        | `STATUS_PLACEMENT_ARBITRATION`                                                                | `STATUS_APPROVED`               | Используется, когда модератор или система решает в пользу заказчика.                                                    |
 | `cancel_from_on_placement_seo`  | Отменить размещение в состоянии «на размещении» (до публикации вебмастером).                                              | `STATUS_ON_PLACEMENT`                                                                         | `STATUS_REJECTED`               | Доступно только в течение 1–72 часов после входа в `STATUS_ON_PLACEMENT`. Через 72 часа становится недоступным.             |
 | `cancel_from_improve_seo`       | Отменить размещение в состоянии «требуется доработка» (вебмастер переделывает контент).                                  | `STATUS_PLACEMENT_IMPROVE`                                                                    | `STATUS_REJECTED`               | Разрешено, только если размещение находится в `STATUS_PLACEMENT_IMPROVE` более 15 дней.                                     |
 | `cancel_seo`                    | Универсальная отмена для размещений в разных состояниях, где процесс застопорился или вы недовольны.                     | `STATUS_MODER`, `STATUS_CLARIFICATION`, `STATUS_ON_PLACEMENT_GUARANTEED`, `STATUS_NEED_APPROVE` | `STATUS_REJECTED`               | Для гарантированных размещений (`STATUS_ON_PLACEMENT_GUARANTEED`) — только после истечения срока.                         |
@@ -66,7 +66,7 @@ perform_placement_action(placement_ids=[PLACEMENT_ID, ...], action="ACTION_NAME"
 | `delete_draft_seo` | Удалить черновик размещения (например, ожидающий оплаты, `STATUS_WAIT_WITHDRAWAL`) |
 | `buy_from_buy_fail_seo` | Повторить покупку размещения в `STATUS_BUY_FAIL` |
 | `delete_from_buy_fail_seo` | Удалить размещение в `STATUS_BUY_FAIL` |
-| `guarantee_wm`, `accept_order_change_links_wm`, `price_changing_action_reject_wm` | Действия вебмастера; аккаунт рекламодателя ими обычно не пользуется |
+| `guarantee_wm`, `accept_order_change_links_wm`, `price_changing_action_reject_wm` | Действия вебмастера; аккаунт заказчика ими обычно не пользуется |
 
 `buy_from_buy_fail_seo` тратит деньги, как покупка: нужна свежая смета и подтверждение, правило «не повторять автоматически» действует.
 
@@ -99,7 +99,7 @@ perform_placement_action(placement_ids=[67890], action="terminate_seo")
 |---------------------------------|-----------------------------------------------------------------|
 | `STATUS_PHANTOM`                | Служебный начальный статус до обработки.           |
 | `STATUS_CREATING`               | Размещение создаётся.                                           |
-| `STATUS_NEED_APPROVE`           | Ждёт одобрения рекламодателя (автозакупка).              |
+| `STATUS_NEED_APPROVE`           | Ждёт одобрения заказчика (автозакупка).              |
 | `STATUS_ON_PLACEMENT`           | Ждёт, пока вебмастер разместит ссылку.                          |
 | `STATUS_APPROVED`               | Размещение активно. Для статейных — завершено; для арендных — идёт ежемесячное списание. |
 | `STATUS_CHANGE_REQUESTED`       | Запрошено изменение (ссылки / текстов).                         |
@@ -111,7 +111,7 @@ perform_placement_action(placement_ids=[67890], action="terminate_seo")
 | Статус                          | Значение                                                        |
 |---------------------------------|-----------------------------------------------------------------|
 | `STATUS_ON_PLACEMENT_GUARANTEED`| Вебмастер гарантировал размещение.                              |
-| `STATUS_ON_CONTENT_APPROVAL`    | Контент готов к проверке рекламодателем.                        |
+| `STATUS_ON_CONTENT_APPROVAL`    | Контент готов к проверке заказчиком.                        |
 | `STATUS_PLACEMENT_CHECK`        | Система проверяет опубликованную страницу.                      |
 | `STATUS_PLACEMENT_IMPROVE`      | Вебмастер должен доработать размещение.                         |
 | `STATUS_PLACEMENT_ARBITRATION`  | Идёт разрешение спора.                                          |
