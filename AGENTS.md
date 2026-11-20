@@ -7,10 +7,16 @@
 Репозиторий содержит **Agent Skills** — портативные пакеты навыков по открытому стандарту
 [Agent Skills](https://agentskills.io) для биржи ссылок [Sape](https://sape.ru). Навыков два:
 
-- `sape-links-seo` — основной: подключение, форматы, поиск, покупка и управление
+- `sape-links` — основной: подключение, форматы, поиск, покупка и управление
   размещениями;
-- `sape-link-placements` — навык по задаче: подбор доноров и покупка, опирается на
-  механику из `sape-links-seo`.
+- `sape-seo` — навык по задаче: SEO-задачи через Sape, сейчас подбор доноров и покупка;
+  опирается на механику из `sape-links`.
+
+Как называем: каталог плагинов `sape` — вся компания; плагин и навык инструментов —
+по продукту и MCP-серверу (`sape-links`, Sape Links MCP), новые инструменты Sape Links идут
+туда же; навыки по задачам — по задаче (`sape-seo`). До 2.1.0 плагин и основной навык
+назывались `sape-links-seo`, навык подбора — `sape-link-placements`; старые имена ни для чего
+не используем.
 
 Общие правила для агентов (подключение, траты, баланс, ошибки, честность) живут в `llms.txt`
 и копируются в каждый навык скриптом — см. «Общие правила навыков».
@@ -21,7 +27,7 @@ Codex (`.codex-plugin/`, `.agents/plugins/`). Аудитории: Claude Code, C
 claude.ai и ChatGPT — ZIP-архивы из релиза. Как ставить и обновлять в каждом агенте — README,
 разделы «Установка» и «Обновление».
 
-- **Название**: Sape Links SEO
+- **Название**: Sape Links (плагин `sape-links` в каталоге `sape`)
 - **GitHub**: [sape-ru/agents-skill-sape](https://github.com/sape-ru/agents-skill-sape)
 - **Владелец**: Sape ([sape.ru](https://sape.ru))
 - **Лицензия**: MIT, файл `LICENSE`. Поле `license` в обоих `plugin.json` держите таким же.
@@ -39,7 +45,7 @@ agents-skill-sape/
 ├── .mcp.json                              # подключение Sape Links MCP в составе плагина (Claude и Codex)
 ├── .claude-plugin/
 │   ├── marketplace.json                   # каталог плагинов Claude (маркетплейс «sape»)
-│   └── plugin.json                        # манифест плагина sape-links-seo
+│   └── plugin.json                        # манифест плагина sape-links
 ├── .codex-plugin/
 │   └── plugin.json                        # манифест плагина для Codex: skills/ и .mcp.json
 ├── .agents/plugins/
@@ -57,13 +63,13 @@ agents-skill-sape/
 │   ├── sync_rules.py                      # копирует правила из llms.txt в навыки
 │   └── validate_skills.py                 # проверка навыков по стандарту
 └── skills/
-    ├── sape-links-seo/
+    ├── sape-links/
     │   ├── SKILL.md                       # основной навык
     │   ├── references/
     │   │   ├── tools.md                   # все инструменты MCP с параметрами
     │   │   └── placement_actions.md       # действия и статусы размещений
     │   └── evals/evals.json               # сценарии проверки поведения
-    └── sape-link-placements/
+    └── sape-seo/
         ├── SKILL.md                       # навык по задаче
         ├── references/
         │   └── similar-sites.md           # поиск похожих площадок
@@ -119,10 +125,10 @@ python3 scripts/validate_skills.py                    # стандарт нав�
 
 | Место | Поле |
 |---|---|
-| `skills/sape-links-seo/SKILL.md` | `version` во frontmatter |
-| `skills/sape-link-placements/SKILL.md` | `version` во frontmatter (сверяет `validate_skills.py`) |
+| `skills/sape-links/SKILL.md` | `version` во frontmatter |
+| `skills/sape-seo/SKILL.md` | `version` во frontmatter (сверяет `validate_skills.py`) |
 | `.claude-plugin/plugin.json` | `version` |
-| `.claude-plugin/marketplace.json` | `version` у плагина `sape-links-seo` |
+| `.claude-plugin/marketplace.json` | `version` у плагина `sape-links` |
 | `.codex-plugin/plugin.json` | `version` |
 | `VERSIONS.md` | строка навыка в таблице |
 
@@ -198,7 +204,7 @@ PR-проверка — обязательный шаг процесса, а н�
 
 ```yaml
 ---
-name: sape-links-seo
+name: sape-links
 version: 1.2.1
 description: Что делает навык и в каких ситуациях его подключать.
 ---
@@ -213,12 +219,12 @@ description: Что делает навык и в каких ситуациях 
 Правила `name`: только нижний регистр, цифры и дефисы; не начинается и не заканчивается
 дефисом; без `--`; совпадает с именем родительского каталога.
 
-Допустимо: `sape-links-seo`. Недопустимо: `Sape-Links-SEO`, `-sape`, `sape--links`.
+Допустимо: `sape-links`. Недопустимо: `Sape-Links-SEO`, `-sape`, `sape--links`.
 
 ### Опциональные каталоги навыка
 
 ```
-skills/sape-links-seo/
+skills/sape-links/
 ├── SKILL.md        # обязательный: frontmatter + инструкции
 ├── references/     # подробные справочники, читаются по требованию
 ├── scripts/        # исполняемый код (сейчас нет)
@@ -282,20 +288,20 @@ skills/sape-links-seo/
 ## Плагины Claude и Codex
 
 Репозиторий — маркетплейс плагинов: `.claude-plugin/marketplace.json` (имя `sape`) описывает
-плагин `sape-links-seo`, чей `source` — корень репозитория. Навыки плагин берёт из `skills/`
+плагин `sape-links`, чей `source` — корень репозитория. Навыки плагин берёт из `skills/`
 (все папки сразу), `.mcp.json` подключает MCP-сервер вместе с плагином.
 
 ```bash
-claude plugin install sape-links-seo --marketplace sape-ru/agents-skill-sape
+claude plugin install sape-links --marketplace sape-ru/agents-skill-sape
 ```
 
 Плагины сторонних маркетплейсов по умолчанию не обновляются сами: пользователь обновляет через
-`/plugin` → **Update now** или `claude plugin update sape-links-seo@sape`, либо включает
+`/plugin` → **Update now** или `claude plugin update sape-links@sape`, либо включает
 автообновление маркетплейса (`/plugin` → **Marketplaces** → `sape` → **Enable auto-update**).
 
 Codex читает свой манифест `.codex-plugin/plugin.json` (поля `skills: ./skills/`,
 `mcpServers: ./.mcp.json`) и каталог `.agents/plugins/marketplace.json`. Установка —
-`codex plugin marketplace add sape-ru/agents-skill-sape`, затем `codex plugin add sape-links-seo@sape`
+`codex plugin marketplace add sape-ru/agents-skill-sape`, затем `codex plugin add sape-links@sape`
 или `/plugins` в сессии;
 обновление — `codex plugin marketplace upgrade sape`. Имя, описание и версию в манифесте Codex
 держите такими же, как в `.claude-plugin/plugin.json`.
@@ -351,7 +357,11 @@ MCP-сервер автоматически. Коннектор появляет
 
 `VERSIONS.md` в `main` — публичная точка сверки версий: навыки по правилу 7 в `llms.txt` раз
 за сессию сравнивают его таблицу со своей `version`. Поэтому таблица должна быть точной, а
-формат строк — прежним (`| навык | X.Y.Z | дата |`). Если добавляете инструкции про
+формат строк — прежним (`| навык | X.Y.Z | дата |`).
+
+Переименованный навык из таблицы не удаляйте: строка старого имени получает версию релиза,
+в котором навык переименован, и пометку в столбце даты: «2026-11-20 — переименован в `sape-links`». Установленный навык со старым именем по правилу 7 увидит версию новее и
+предложит обновиться, а README («Обновление» → «Переход с 2.0») объяснит, что делать. Если добавляете инструкции про
 обновление, используйте этот файл, а не `plugin.json`:
 
 ```bash

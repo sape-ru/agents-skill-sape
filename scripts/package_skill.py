@@ -29,7 +29,7 @@ import zipfile
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SKILLS_DIR = ROOT / "skills"
 WEB_DESC_FILE = ROOT / "packaging" / "claude-web-descriptions.json"
-PLUGIN = "sape-links-seo"  # имя плагина в манифестах
+PLUGIN = "sape-links"  # имя плагина в манифестах
 MAX_DESC = 1024
 MAX_WEB_DESC = 200
 # Не кладём в архив: служебные файлы и проверки для разработчиков.
