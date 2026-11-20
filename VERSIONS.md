@@ -1,4 +1,4 @@
-# Sape Links SEO — версии
+# Навыки Sape — версии
 
 Текущая версия навыка. Агенты могут сравнить её с локальной, чтобы проверить обновления.
 
@@ -8,10 +8,42 @@
 
 | Навык | Версия | Обновлён |
 |-------|--------|----------|
-| sape-links-seo | 2.0.1 | 2026-11-19 |
-| sape-link-placements | 2.0.1 | 2026-11-19 |
+| sape-links | 2.1.0 | 2026-11-20 |
+| sape-seo | 2.1.0 | 2026-11-20 |
+| sape-links-seo | 2.1.0 | 2026-11-20 — переименован в `sape-links` |
+| sape-link-placements | 2.1.0 | 2026-11-20 — переименован в `sape-seo` |
+
+Навыки `sape-links-seo` и `sape-link-placements` с версии 2.1.0 называются `sape-links` и
+`sape-seo`. Старые удалите и поставьте новые — README, раздел «Переход с 2.0».
 
 ## Последние изменения
+
+### 2.1.0 (2026-11-20)
+
+Навыки и плагин Sape переименованы: удалите старый плагин и навыки и поставьте новые.
+
+- Плагин `sape-links-seo` теперь называется `sape-links` (каталог прежний — `sape`), навык
+  `sape-links-seo` — `sape-links`, навык `sape-link-placements` — `sape-seo`. Содержание
+  навыков не менялось.
+- Старые имена больше не обновляются: команды обновления для `sape-links-seo` не сработают.
+  Старый и новый плагин вместе ставить не нужно — инструменты задвоятся.
+- Установка в README пронумерована по ассистентам: Claude, Claude Code, Codex, ChatGPT,
+  Cursor и другие.
+
+Что сделать:
+
+- Claude Code: `claude plugin uninstall sape-links-seo@sape`, затем
+  `claude plugin marketplace update sape` и `claude plugin install sape-links@sape`.
+- Codex: `codex plugin remove sape-links-seo@sape`, затем
+  `codex plugin marketplace upgrade sape` и `codex plugin add sape-links@sape`.
+- Claude Desktop и claude.ai: удалите плагин `sape-links-seo` или навыки `sape-links-seo` и
+  `sape-link-placements` в *Customize*, затем поставьте плагин `sape-links` или новые архивы.
+- `npx skills`: `npx skills remove sape-links-seo sape-link-placements`, затем
+  `npx skills add sape-ru/agents-skill-sape`.
+- ChatGPT и ручная установка: удалите старые навыки и загрузите архивы `sape-links.zip` и
+  `sape-seo.zip`.
+
+Подробно — README, раздел «Переход с 2.0».
 
 ### 2.0.1 (2026-11-19)
 

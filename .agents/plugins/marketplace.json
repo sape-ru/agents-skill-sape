@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "sape-links-seo",
+      "name": "sape-links",
       "source": {
         "source": "local",
         "path": "./"
